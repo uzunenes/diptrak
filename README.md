@@ -1,2 +1,2 @@
 # dvmot
-deep learning base visual multiple objects tracking
+Deep Visual Multiple Object Tracking
