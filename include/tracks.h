@@ -9,8 +9,8 @@ struct tracks
 	int id;
 	cv::Rect bbox;
 	cv::KalmanFilter kalman_filter;
-	int age; // the number of frames since the track was first detected.
-	int total_visible_count; // the total number of frames in which the track was detected (visible).
+	int age;                         // the number of frames since the track was first detected.
+	int total_visible_count;         // the total number of frames in which the track was detected (visible).
 	int consecutive_invisible_count; // the number of consecutive frames for which the track was not detected (invisible).
 };
 
