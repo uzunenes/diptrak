@@ -3,6 +3,7 @@
 #include "../include/dnnetwork.h"
 #include "../include/image_opencv.h"
 #include "../include/ini.h"
+#include "../include/tracks.h"
 #include <cstdlib>
 #include <iostream>
 #include <signal.h>
@@ -11,6 +12,9 @@
 // -- global variables ---
 static volatile int g_exit_signal = 0;
 // ------------------------
+
+int
+vizualize_tracks_and_check_exit(int show_frame, cv::Mat& frame, cv::VideoCapture& cap, cv::VideoWriter& video_writer);
 
 int
 main(int argc, char** argv)
@@ -22,7 +26,8 @@ main(int argc, char** argv)
 	cv::VideoCapture cap;
 	cv::VideoWriter video_writer;
 	cv::Mat frame;
-	char key;
+	std::vector<cv::Rect> det_cv;
+	std::vector<struct tracks> tracks_objects;
 
 	fprintf(stdout, "%s(): dvmot started, version: [%s] .\n", __func__, Version);
 	if (argc != 2)
@@ -60,36 +65,30 @@ main(int argc, char** argv)
 
 	while (1)
 	{
-		if (!cap.read(frame))
+		if (get_frame(cap, frame) != 0)
 		{
-			fprintf(stderr, "%s(): Frame reading error. \n", __func__);
-			break;
-		}
-		if (frame.empty())
-		{
-			fprintf(stdout, "%s(): Frame empty, end of the video file. \n", __func__);
 			break;
 		}
 
-		predict_image(&dnnet, frame);
+		det_cv = detect_objects(&dnnet, frame, debug);
 
-		write_frame_in_video(video_writer, frame);
+		predict_new_locations_of_tracks(tracks_objects); // predict kalman, update tracks bbox
 
-		if (show_frame)
+		update_tracks(tracks_objects, det_cv);
+
+		draw_tracks(tracks_objects, frame);
+
+		det_cv.clear();
+
+		if (vizualize_tracks_and_check_exit(show_frame, frame, cap, video_writer) != 0)
 		{
-			cv::imshow("dvmot", frame);
-		}
-
-		key = cv::waitKey(10);
-		if (g_exit_signal || key == 27)
-		{
-			break;
+			break
 		}
 	}
 
 	release_video_writer(video_writer);
 	close_network(&dnnet);
-	fprintf(stdout, "%s(): bye.. :) \n", __func__);
+	fprintf(stdout, "%s(): bye.. \n", __func__);
 
 	return 0;
 }
@@ -150,6 +149,27 @@ read_ini_file(const char* file_name, int* debug, int* show_frame, struct dnnetwo
 	fprintf(stdout, "%s(): video_stream_output_name: [%s] .\n", __func__, video_stream_output_name);
 
 	ini_free(config);
+
+	return 0;
+}
+
+int
+vizualize_tracks_and_check_exit(int show_frame, cv::Mat& frame, cv::VideoCapture& cap, cv::VideoWriter& video_writer)
+{
+	char key;
+
+	if (show_frame)
+	{
+		cv::imshow("dvmot", frame);
+	}
+
+	write_frame_in_video(video_writer, frame);
+
+	key = cv::waitKey(10);
+	if (g_exit_signal || key == 27)
+	{
+		return -1;
+	}
 
 	return 0;
 }
