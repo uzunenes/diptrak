@@ -2,6 +2,10 @@
 #define IMAGE_OPENCV_H
 
 #include <opencv2/opencv.hpp>
+#include <vector>
+
+int
+get_frame(cv::VideoCapture& cap, cv::Mat& m);
 
 int
 open_video_stream(const char* file_name, cv::VideoCapture& cap);
@@ -23,5 +27,8 @@ get_width_mat(cv::Mat& m);
 
 int
 get_height_mat(cv::Mat& m);
+
+void
+draw_detections(std::vector<cv::Rect>& det_cv, cv::Mat& frame);
 
 #endif // IMAGE_OPENCV_H

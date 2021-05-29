@@ -1,6 +1,23 @@
 #include "../include/image_opencv.h"
 
 int
+get_frame(cv::VideoCapture& cap, cv::Mat& frame)
+{
+	if (!cap.read(frame))
+	{
+		fprintf(stderr, "%s(): Frame reading error. \n", __func__);
+		return -1;
+	}
+	if (frame.empty())
+	{
+		fprintf(stdout, "%s(): Frame empty, end of the video file. \n", __func__);
+		return -2;
+	}
+
+	return 0;
+}
+
+int
 open_video_stream(const char* file_name, cv::VideoCapture& cap)
 {
 	fprintf(stdout, "%s(): Openining video file: [%s] .\n", __func__, file_name);
@@ -109,4 +126,15 @@ get_height_mat(cv::Mat& m)
 	}
 
 	return m.rows;
+}
+
+void
+draw_detections(std::vector<cv::Rect>& det_cv, cv::Mat& m)
+{
+	int i;
+
+	for (i = 0; i < (int)det_cv.size(); ++i)
+	{
+		cv::rectangle(m, det_cv[i], cv::Scalar(255, 100, 0), 2, 0);
+	}
 }
