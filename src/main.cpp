@@ -14,9 +14,6 @@ static volatile int g_exit_signal = 0;
 // ------------------------
 
 int
-vizualize_tracks_and_check_exit(int show_frame, cv::Mat& frame, cv::VideoCapture& cap, cv::VideoWriter& video_writer);
-
-int
 main(int argc, char** argv)
 {
 	int debug, show_frame;
@@ -80,9 +77,16 @@ main(int argc, char** argv)
 
 		det_cv.clear();
 
-		if (vizualize_tracks_and_check_exit(show_frame, frame, cap, video_writer) != 0)
+		if (show_frame)
 		{
-			break
+			cv::imshow("dvmot", frame);
+		}
+
+		write_frame_in_video(video_writer, frame);
+
+		if (cv::waitKey(10) == 27 || g_exit_signal) // pressed ESC or kill signal
+		{
+			break;
 		}
 	}
 
@@ -149,27 +153,6 @@ read_ini_file(const char* file_name, int* debug, int* show_frame, struct dnnetwo
 	fprintf(stdout, "%s(): video_stream_output_name: [%s] .\n", __func__, video_stream_output_name);
 
 	ini_free(config);
-
-	return 0;
-}
-
-int
-vizualize_tracks_and_check_exit(int show_frame, cv::Mat& frame, cv::VideoCapture& cap, cv::VideoWriter& video_writer)
-{
-	char key;
-
-	if (show_frame)
-	{
-		cv::imshow("dvmot", frame);
-	}
-
-	write_frame_in_video(video_writer, frame);
-
-	key = cv::waitKey(10);
-	if (g_exit_signal || key == 27)
-	{
-		return -1;
-	}
 
 	return 0;
 }
