@@ -47,19 +47,18 @@ load_dnnetwork(struct dnnetwork* dnnet)
 	return 0;
 }
 
-int
+void
 close_network(struct dnnetwork* dnnet)
 {
 	free_network_ptr(dnnet->net);
-
-	return 0;
 }
 
-static int
-draw_detections(const detection* det, int det_cnt, const int* det_filtered_flag, cv::Mat& m)
+static std::vector<cv::Rect>
+detections_to_opencv_rect(const detection* det, int det_cnt, const int* det_filtered_flag, cv::Mat& m)
 {
 	int i;
 	detection* temp_det_ptr;
+	std::vector<cv::Rect> det_cv;
 
 	for (i = 0; i < det_cnt; ++i)
 	{
@@ -80,21 +79,31 @@ draw_detections(const detection* det, int det_cnt, const int* det_filtered_flag,
 		int right = (kx) + (kw / 2);
 		int bottom = (ky) + (kh / 2);
 
-		cv::rectangle(m, cv::Point(left, top), cv::Point(right, bottom), cv::Scalar(255, 100, 0), 2, 0);
+		det_cv.push_back(cv::Rect(cv::Point(left, top), cv::Point(right, bottom)));
 	}
 
-	return 0;
+	return det_cv;
 }
 
-int
-predict_image(const struct dnnetwork* dnnet, cv::Mat& m)
+std::vector<cv::Rect>
+detect_objects(const struct dnnetwork* dnnet, cv::Mat& m, int debug)
 {
-	double start_time = what_time_is_it_now();
 	detection *det, *temp_det_ptr;
 	int det_cnt, i, j;
 	float max, thresh_normalized;
 	int* det_filtered_flag;
 	image im;
+	std::vector<cv::Rect> det_cv;
+	double start_time;
+
+	if(debug)
+	{
+		start_time = what_time_is_it_now();
+	}
+	else
+	{
+		start_time = 0;
+	}
 
 	im = mat_to_image(m);
 	network_predict_image(dnnet->net, im);
@@ -107,7 +116,7 @@ predict_image(const struct dnnetwork* dnnet, cv::Mat& m)
 	det_filtered_flag = (int*)malloc(det_cnt * sizeof(int));
 	if (det_filtered_flag == NULL)
 	{
-		return -1;
+		return det_cv;
 	}
 
 	for (i = 0; i < det_cnt; ++i)
@@ -133,13 +142,16 @@ predict_image(const struct dnnetwork* dnnet, cv::Mat& m)
 		}
 	}
 
-	draw_detections(det, det_cnt, det_filtered_flag, m);
+	det_cv = detections_to_opencv_rect(det, det_cnt, det_filtered_flag, m);
 
 	free_detections(det, det_cnt);
 	free_image(im);
 	free(det_filtered_flag);
 
-	fprintf(stdout, "%s(): Elapsed time: [%.1f] milisec, Detected object: [%d] \n", __func__, (what_time_is_it_now() - start_time) * 1000, det_cnt);
+	if(debug)
+	{
+		fprintf(stdout, "%s(): Elapsed time: [%.1f] milisec, Detected object: [%d] \n", __func__, (what_time_is_it_now() - start_time) * 1000, (int)det_cv.size());
+	}
 
-	return 0;
+	return det_cv;
 }
