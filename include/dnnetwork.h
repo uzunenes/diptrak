@@ -19,10 +19,10 @@ struct dnnetwork
 int
 load_dnnetwork(struct dnnetwork* dnnet);
 
-int
+void
 close_network(struct dnnetwork* dnnet);
 
-int
-predict_image(const struct dnnetwork* dnnet, cv::Mat& m);
+std::vector<cv::Rect>
+detect_objects(const struct dnnetwork* dnnet, cv::Mat& m, int debug);
 
 #endif // DNNETWORK_H
