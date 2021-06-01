@@ -4,6 +4,13 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
+struct det_cv
+{
+    char name[64];
+    cv::Rect bbox_cv;
+    float pred_score;
+};
+
 int
 get_frame(cv::VideoCapture& cap, cv::Mat& m);
 
@@ -29,6 +36,12 @@ int
 get_height_mat(cv::Mat& m);
 
 void
+draw_bbox_cv(cv::Rect& bbox_cv, cv::Mat& m);
+
+void
 draw_detections(std::vector<cv::Rect>& det_cv, cv::Mat& frame);
+
+void
+print_detection_cv(std::vector<cv::Rect>& det_cv);
 
 #endif // IMAGE_OPENCV_H

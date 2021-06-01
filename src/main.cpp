@@ -50,7 +50,7 @@ main(int argc, char** argv)
 		return -1;
 	}
 
-	if (create_video_writer(video_writer, video_stream_output_name, 'H', '2', '6', '4', get_stream_fps(cap), get_width_mat(frame), get_height_mat(frame), 1) != 0)
+	if (create_video_writer(video_writer, video_stream_output_name, 'D', 'I', 'V', 'X', get_stream_fps(cap), get_width_mat(frame), get_height_mat(frame), 1) != 0)
 	{
 		return -1;
 	}
@@ -70,6 +70,8 @@ main(int argc, char** argv)
 		det_cv = detect_objects(&dnnet, frame, debug);
 
 		predict_new_locations_of_tracks(tracks_objects); // predict kalman, update tracks bbox
+
+        print_detection_cv(det_cv);
 
 		update_tracks(tracks_objects, det_cv);
 

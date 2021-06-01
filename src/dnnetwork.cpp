@@ -53,12 +53,14 @@ close_network(struct dnnetwork* dnnet)
 	free_network_ptr(dnnet->net);
 }
 
+
 static std::vector<cv::Rect>
 detections_to_opencv_rect(const detection* det, int det_cnt, const int* det_filtered_flag, cv::Mat& m)
 {
 	int i;
 	detection* temp_det_ptr;
 	std::vector<cv::Rect> det_cv;
+    cv::Rect bbox_cv;
 
 	for (i = 0; i < det_cnt; ++i)
 	{
@@ -74,12 +76,35 @@ detections_to_opencv_rect(const detection* det, int det_cnt, const int* det_filt
 		int kx = m.cols * temp_det_ptr->bbox.x;
 		int ky = m.rows * temp_det_ptr->bbox.y;
 
-		int left = (kx) - (kw / 2);
-		int top = (ky) - (kh / 2);
-		int right = (kx) + (kw / 2);
-		int bottom = (ky) + (kh / 2);
+		int left_x = kx - (kw / 2);
+		int top_y = ky - (kh / 2);
 
-		det_cv.push_back(cv::Rect(cv::Point(left, top), cv::Point(right, bottom)));
+        if (left_x < 0)
+            left_x = 0;
+        else if ( left_x > m.cols  )
+            left_x = m.cols;
+
+        if ( top_y < 0 )
+            top_y = 0;
+        else if ( top_y > m.rows )
+            top_y = m.rows;
+
+        if ( kw < 0)
+            kw = 0;
+        else if( kw > m.cols )
+            kw = m.cols;
+
+        if ( kh < 0)
+            kh = 0;
+        else if( kw > m.rows )
+            kw = m.rows;
+
+        bbox_cv.x = left_x;
+        bbox_cv.y = top_y;
+        bbox_cv.width = kw;
+        bbox_cv.height = kh;
+
+		det_cv.push_back(bbox_cv);
 	}
 
 	return det_cv;
@@ -155,3 +180,4 @@ detect_objects(const struct dnnetwork* dnnet, cv::Mat& m, int debug)
 
 	return det_cv;
 }
+

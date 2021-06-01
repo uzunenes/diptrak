@@ -20,11 +20,14 @@ get_frame(cv::VideoCapture& cap, cv::Mat& frame)
 int
 open_video_stream(const char* file_name, cv::VideoCapture& cap)
 {
-	fprintf(stdout, "%s(): Openining video file: [%s] .\n", __func__, file_name);
+    char gst_pipeline[256];
+
+    sprintf(gst_pipeline, "filesrc location=%s ! decodebin ! videoconvert ! appsink", file_name);
+	fprintf(stdout, "%s(): Openining video file: [%s] , pipeline: [%s] .\n", __func__, file_name, gst_pipeline);
 
 	try
 	{
-		cap.open(file_name);
+		cap.open(gst_pipeline, cv::CAP_GSTREAMER);
 	}
 	catch (...)
 	{
@@ -129,12 +132,30 @@ get_height_mat(cv::Mat& m)
 }
 
 void
+draw_bbox_cv(cv::Rect& bbox_cv, cv::Mat& m)
+{
+    cv::rectangle(m, bbox_cv, cv::Scalar(255, 100, 0), 2, 0);
+}
+
+void
 draw_detections(std::vector<cv::Rect>& det_cv, cv::Mat& m)
 {
 	int i;
 
 	for (i = 0; i < (int)det_cv.size(); ++i)
 	{
-		cv::rectangle(m, det_cv[i], cv::Scalar(255, 100, 0), 2, 0);
+        draw_bbox_cv(det_cv[i], m);
 	}
 }
+
+void
+print_detection_cv(std::vector<cv::Rect>& det_cv)
+{
+    int i;
+
+    for( i = 0; i < (int)det_cv.size(); ++i)
+    {
+        printf("%s(): index: [%d], x: [%d] y: [%d] width: [%d] height: [%d] \n", __func__, i, det_cv[i].x, det_cv[i].y, det_cv[i].width, det_cv[i].height);
+    }
+}
+
