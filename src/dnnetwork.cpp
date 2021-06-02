@@ -149,7 +149,8 @@ detect_objects(const struct dnnetwork* dnnet, cv::Mat& m, int debug)
 		max = 0;
 		det_filtered_flag[i] = -1;
 
-		for (j = 0; j < det->classes; ++j)
+		for (j = 0; j < 1; ++j ) // !! only person id
+        // for (j = 0; j < det->classes; ++j)
 		{
 			temp_det_ptr = det + i;
 

@@ -22,15 +22,13 @@ mat_to_point(cv::Mat& m)
 static cv::Mat
 point_to_mat(cv::Point& p)
 {
-    cv::Mat m(1, 2, CV_32F);
+    cv::Mat m(2, 1, CV_32F);
 
     m.at<float>(0) = p.x;
     m.at<float>(1) = p.y;
 
     return m;
 }
-
-
 
 cv::Point2f
 predict(cv::KalmanFilter& kalman)
@@ -42,17 +40,18 @@ predict(cv::KalmanFilter& kalman)
     return mat_to_point(m);
 }
 
-void
+cv::Mat
 correct(cv::KalmanFilter& kalman, cv::Point p)
 {
     cv::Mat m = point_to_mat(p);
 
-    kalman.correct(m);
+    cv::Mat estimated = kalman.correct(m);
+
+    return estimated;
 }
 
-
 cv::KalmanFilter
-init_kalman_filter()
+init_kalman_filter(cv::Point initial_point)
 {
     const int stateSize = 4;
     const int measSize = 2;
@@ -69,19 +68,15 @@ init_kalman_filter()
 
     // set Transition Matrix
     kf.transitionMatrix = cv::Mat(4, 4, CV_32F, fltTransitionMatrixValues);
-
-
-    // declare an array of floats to feed into Kalman Filter Measurement Matrix, also known as Measurement Model
-    float fltMeasurementMatrixValues[2][4] = { { 1, 0, 0, 0 },
-                                               { 0, 1, 0, 0 } };
     // set Measurement Matrix
-    kf.measurementMatrix = cv::Mat(2, 4, CV_32F, fltMeasurementMatrixValues);
+    kf.statePre.at<float>(0) = (float)initial_point.x;;
+    kf.statePre.at<float>(1) = (float)initial_point.y;
+    kf.statePre.at<float>(2) = 0;
+    kf.statePre.at<float>(3) = 0;
 
-    // default is 1, for smoothing try 0.0001
-    cv::setIdentity(kf.processNoiseCov, cv::Scalar::all(0.0001));
-    // default is 1, for smoothing try 10
-    cv::setIdentity(kf.measurementNoiseCov, cv::Scalar::all(10));
-    // default is 0, for smoothing try 0.1
+    cv::setIdentity(kf.measurementMatrix);
+    cv::setIdentity(kf.processNoiseCov, cv::Scalar::all(1e-4));
+    cv::setIdentity(kf.measurementNoiseCov, cv::Scalar::all(1e-1));
     cv::setIdentity(kf.errorCovPost, cv::Scalar::all(0.1));
 
     return kf;

@@ -27,7 +27,8 @@ get_center_bbox_cv(cv::Rect& bbox_cv)
 }
 
 static void
-create_new_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Rect>& det_cv, std::vector<int>& unassigned_detections)
+create_new_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Rect>& det_cv, 
+                                                                        std::vector<int>& unassigned_detections)
 {
     int i, index;
 
@@ -38,7 +39,7 @@ create_new_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Re
 
         new_tracks.id = g_next_id;
         new_tracks.bbox_cv = det_cv[index];
-        new_tracks.kalman_filter = init_kalman_filter();
+        new_tracks.kalman_filter = init_kalman_filter(get_center_bbox_cv(new_tracks.bbox_cv));
         new_tracks.age = 1;
         new_tracks.total_visible_count = 1;
         new_tracks.consecutive_invisible_count = 0;
@@ -60,7 +61,7 @@ delete_lost_tracks(std::vector<struct tracks>& tracks)
 
 	for (i = 0; i < (int)tracks.size(); ++i)
 	{
-		visibility = tracks[i].total_visible_count / tracks[i].age;
+		visibility = (float)tracks[i].total_visible_count / (float)tracks[i].age;
 
 		if ((visibility < visibility_threshold && tracks[i].age < age_threshold) || tracks[i].consecutive_invisible_count > invisible_for_too_long)
 		{
@@ -96,7 +97,7 @@ update_assigned_tracks(std::vector<struct tracks>& tracks_objects, std::vector<c
         cv::Rect bbox_cv_det = det_cv[det_idx];
         cv::Point det_center_point = get_center_bbox_cv(det_cv[det_idx]);
 
-        correct(tracks_objects[track_idx].kalman_filter, det_center_point);
+//        correct(tracks_objects[track_idx].kalman_filter, det_center_point);
 
         tracks_objects[track_idx].bbox_cv = bbox_cv_det;
 
@@ -112,10 +113,11 @@ detection_to_track_assignment(std::vector<struct tracks>& tracks_objects, std::v
 {
     int i, j;
     double distance, cost;
-    const int th_distance = 20;
+    const int distance_th = 30;
     HungarianAlgorithm hung_algo;
     std::vector<int> assignment;
-    std::vector<std::vector<double>> cost_matrix( tracks_objects.size(), std::vector<double> (det_cv.size(), 0)); // init zeros
+    std::vector<std::vector<double>> cost_matrix( det_cv.size(), std::vector<double> ( tracks_objects.size(), distance_th));
+    std::vector<std::vector<int>> cost_matrix_det_idx( det_cv.size(), std::vector<int> ( tracks_objects.size(), distance_th));
 
     if( tracks_objects.size() == 0 )
     {
@@ -126,32 +128,60 @@ detection_to_track_assignment(std::vector<struct tracks>& tracks_objects, std::v
         return;
     }
 
-    // calc. Euclidean distance
-    for( i = 0; i < (int)tracks_objects.size(); ++i )
+    // unassigned_detections
+    for( i = 0; i < (int)det_cv.size(); ++i )
     {
-        for( j = 0; j < (int)det_cv.size(); ++j )
+        bool flag = 0;
+        for( j = 0; j < (int)tracks_objects.size(); ++j )
         {
-            printf("%d %d %d %d \n", tracks_objects[i].bbox_cv.x, tracks_objects[i].bbox_cv.y, tracks_objects[i].bbox_cv.width, tracks_objects[i].bbox_cv.height);
+            cv::Point center_point1 = get_center_bbox_cv(tracks_objects[j].bbox_cv);
+            cv::Point center_point2 = get_center_bbox_cv(det_cv[i]);
 
-            cv::Point center_point1 = get_center_bbox_cv(tracks_objects[i].bbox_cv);
-            cv::Point center_point2 = get_center_bbox_cv(det_cv[j]);
+            distance = sqrt( pow(center_point1.y - center_point2.y, 2) + pow((center_point1.x - center_point2.x), 2) );
 
-            distance = cv::norm(cv::Mat(center_point1), cv::Mat(center_point2));
+//            std::cout << center_point1 << center_point2 << distance << "\n";
 
-            cost_matrix[i][j] = distance;
-            printf("%d %d , %d %d : dist: %f \n", center_point1.x, center_point1.y, center_point2.x, center_point2.y, distance);
+            if( distance < distance_th )
+            {
+                flag = 1;
+                cost_matrix[i][j] = distance;
+            }
         }
+
+        if( flag == 0)
+            unassigned_detections.push_back(i);
     }
 
+
+    for(int k=0;k < (int)det_cv.size();++k )
+    {
+        for( int l=0; l < (int)tracks_objects.size() ;++l)
+        {
+            std::cout << cost_matrix[k][l] << " ";
+        }
+        std::cout << "\n";
+    }
 
     cost = hung_algo.Solve(cost_matrix, assignment);
-    std::cout << "\n *** Hung ***: " << cost << std::endl;
+    fprintf(stdout, "%s(): Hung algo cost: [%.1f] \n", __func__, cost);
+    
     for( i = 0; i < (int)cost_matrix.size(); ++i )
     {
-        std::cout << i << "," << assignment[i] << "\t";
+        fprintf(stdout, "%d,%d \t", i, assignment[i]);
+
+        if( assignment[i] != -1 && cost_matrix[i][assignment[i]] != distance_th )// assignments_indexs
+        {
+            assignment_idx temp;
+            temp.track_idx = assignment[i];
+            temp.det_idx = i;
+            assignments_indexs.push_back(temp);
+        }
+        else if( assignment[i] != -1 && cost_matrix[i][assignment[i]] == distance_th ) // // unassignments_tracks
+        {
+            unassignments_tracks.push_back(assignment[i]);
+        }
     }
-    std::cout << "\ncost: " << cost << std::endl;
-    std::cout << "\n *** Hung ***: " << cost << std::endl;
+    fprintf(stdout, "\n");
 }
 
 void
@@ -160,15 +190,19 @@ update_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Rect>&
     std::vector<assignment_idx> assignments_indexs;
     std::vector<int> unassigned_detections, unassignments_tracks;
 
-    detection_to_track_assignment(tracks_objects, det_cv, assignments_indexs, unassignments_tracks, unassigned_detections);
+    detection_to_track_assignment(tracks_objects, det_cv, 
+                                                    assignments_indexs, unassignments_tracks, unassigned_detections);
 
-    update_assigned_tracks(tracks_objects, det_cv, assignments_indexs);
+    update_assigned_tracks(tracks_objects, det_cv, 
+                                            assignments_indexs);
 
-    update_unassigned_tracks(tracks_objects, det_cv, unassignments_tracks);
+    update_unassigned_tracks(tracks_objects, det_cv, 
+                                                unassignments_tracks);
 
     delete_lost_tracks(tracks_objects);
 
-    create_new_tracks(tracks_objects, det_cv, unassigned_detections);
+    create_new_tracks(tracks_objects, det_cv,
+                                        unassigned_detections);
 }
 
 void
@@ -185,10 +219,16 @@ predict_new_locations_of_tracks(std::vector<struct tracks>& tracks_objects)
         predicted_centroid = predict(tracks_objects[i].kalman_filter);
 
         predicted_centroid.x = predicted_centroid.x - ((float)bbox_cv.width / 2.0);
-        predicted_centroid.y = predicted_centroid.y - ((float)bbox_cv.height / 2.0);
+        if( predicted_centroid.x < 0)
+            predicted_centroid.x = 0;
 
+        predicted_centroid.y = predicted_centroid.y - ((float)bbox_cv.height / 2.0);
+        if( predicted_centroid.y < 0)
+            predicted_centroid.y = 0;
+   
         bbox_cv.x = (int)round(predicted_centroid.x);
         bbox_cv.y = (int)round(predicted_centroid.y);
+        printf("%s: %d %d %d %d \n", __func__, bbox_cv.x, bbox_cv.y, bbox_cv.width, bbox_cv.height);
 
         tracks_objects[i].bbox_cv = bbox_cv;
     }
@@ -209,9 +249,9 @@ draw_tracks(std::vector<struct tracks>& tracks_objects, cv::Mat& m)
         sprintf(id, "%d", tracks_objects[i].id);
         cv::putText(m, id, center, 
             cv::FONT_HERSHEY_COMPLEX_SMALL, // Font
-            1.0, // Scale. 2.0 = 2x bigger
-            cv::Scalar(255,255,255), // BGR Color
-            1, // Line Thickness (Optional)
+            1.5, // Scale. 2.0 = 2x bigger
+            cv::Scalar(0, 0, 255), // BGR Color
+            2, // Line Thickness (Optional)
             cv:: LINE_AA); // Anti-alias (Optional, see version note)
     }
 }

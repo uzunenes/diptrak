@@ -8,9 +8,9 @@ cv::Point2f
 predict(cv::KalmanFilter& kalman);
 
 cv::KalmanFilter
-init_kalman_filter();
+init_kalman_filter(cv::Point initial_point);
 
-void
+cv::Mat
 correct(cv::KalmanFilter& kalman, cv::Point p);
 
 #endif // KALMAN_H
