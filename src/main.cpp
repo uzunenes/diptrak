@@ -60,7 +60,7 @@ main(int argc, char** argv)
 		return -1;
 	}
 
-    int cikk = 0;
+    int test_cnt = 0;
 	while (1)
 	{
 		if (get_frame(cap, frame) != 0)
@@ -70,13 +70,13 @@ main(int argc, char** argv)
 
 		det_cv = detect_objects(&dnnet, frame, debug);
 
-//		predict_new_locations_of_tracks(tracks_objects); // predict kalman, update tracks bbox
+        // predict_new_locations_of_tracks(tracks_objects); // predict kalman, update tracks bbox
 
         print_detection_cv(det_cv);
 
 		update_tracks(tracks_objects, det_cv);
 
-//        draw_detections(det_cv, frame);
+        // draw_detections(det_cv, frame);
 
 		draw_tracks(tracks_objects, frame);
 
@@ -93,8 +93,8 @@ main(int argc, char** argv)
 		{
 			break;
 		}
-        if(++cikk==100)
-        break;
+
+        if ( ++test_cnt > 100 ) break;
 	}
 
 	release_video_writer(video_writer);
