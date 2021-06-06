@@ -30,6 +30,10 @@ static void
 create_new_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Rect>& det_cv, std::vector<int>& unassigned_detections)
 {
     int i, index;
+    int state_size = 4;
+    int meas_size = 2;
+    int contr_size = 0;
+    int type = CV_32F;
 
     for (i = 0; i < (int)unassigned_detections.size(); ++i)
     {
@@ -38,7 +42,8 @@ create_new_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Re
 
         new_tracks.id = g_next_id;
         new_tracks.bbox_cv = det_cv[index];
-        new_tracks.kalman_filter = init_kalman_filter(get_center_bbox_cv(new_tracks.bbox_cv));
+        new_tracks.kalman_filter = init_kalman_filter(get_center_bbox_cv(new_tracks.bbox_cv), state_size, meas_size, contr_size, type);
+        new_tracks.last_tick_kf = 0;
         new_tracks.age = 1;
         new_tracks.total_visible_count = 1;
         new_tracks.consecutive_invisible_count = 0;
@@ -55,7 +60,7 @@ delete_lost_tracks(std::vector<struct tracks>& tracks)
 	int i;
     float visibility;
 
-	const int invisible_for_too_long = 20;
+	const int invisible_for_too_long = 15;
 	const int age_threshold = 8;
 	const float visibility_threshold = 0.6;
 
@@ -96,8 +101,8 @@ update_assigned_tracks(std::vector<struct tracks>& tracks_objects, std::vector<c
 
         cv::Rect bbox_cv_det = det_cv[det_idx];
        
-        // cv::Point det_center_point = get_center_bbox_cv(det_cv[det_idx]);
-        // correct(tracks_objects[track_idx].kalman_filter, det_center_point);
+        cv::Point det_center_point = get_center_bbox_cv(det_cv[det_idx]);
+        correct(tracks_objects[track_idx].kalman_filter, det_center_point);
 
         tracks_objects[track_idx].bbox_cv = bbox_cv_det;
 
@@ -236,6 +241,7 @@ predict_new_locations_of_tracks(std::vector<struct tracks>& tracks_objects)
     {
         bbox_cv = tracks_objects[i].bbox_cv;
 
+        update_dT(tracks_objects[i].kalman_filter, tracks_objects[i].last_tick_kf);
         predicted_centroid = predict(tracks_objects[i].kalman_filter);
 
         predicted_centroid.x = predicted_centroid.x - ((float)bbox_cv.width / 2.0);
