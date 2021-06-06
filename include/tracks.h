@@ -24,7 +24,4 @@ predict_new_locations_of_tracks(std::vector<struct tracks>& tracks_objects);
 void
 draw_tracks(std::vector<struct tracks>& tracks_objects, cv::Mat& m);
 
-cv::Point
-get_center_bbox_cv(cv::Rect& bbox_cv);
-
 #endif // TRACKS_H

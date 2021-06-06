@@ -2,6 +2,7 @@
 #include "../include/kalman.h"
 #include "../include/hungarian.h"
 #include "../include/image_opencv.h"
+#include "../include/utils.h"
 #include <math.h>
 
 
@@ -14,17 +15,6 @@ typedef struct
     int track_idx;
     int det_idx;
 } assignment_idx;
-
-cv::Point
-get_center_bbox_cv(cv::Rect& bbox_cv)
-{
-    cv::Point p;
-
-    p.x = bbox_cv.x + (bbox_cv.width / 2);
-    p.y = bbox_cv.y + (bbox_cv.height / 2);
-
-    return p;
-}
 
 static void
 create_new_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Rect>& det_cv, std::vector<int>& unassigned_detections)

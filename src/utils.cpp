@@ -42,3 +42,38 @@ point_to_mat(cv::Point2f& p)
 
     return m;
 }
+
+cv::Point
+get_center_bbox_cv(cv::Rect& bbox_cv)
+{
+    cv::Point p;
+
+    p.x = bbox_cv.x + (bbox_cv.width / 2);
+    p.y = bbox_cv.y + (bbox_cv.height / 2);
+
+    return p;
+}
+
+int
+get_width_mat(cv::Mat& m)
+{
+    if (m.empty())
+    {
+        fprintf(stderr, "%s(): Mat is empty \n", __func__);
+        return 0;
+    }
+
+    return m.cols;
+}
+
+int
+get_height_mat(cv::Mat& m)
+{
+    if (m.empty())
+    {
+        fprintf(stderr, "%s(): Mat is empty \n", __func__);
+        return 0;
+    }
+
+    return m.rows;
+}

@@ -1,4 +1,5 @@
 #include "../include/image_opencv.h"
+#include "../include/utils.h"
 
 int
 get_frame(cv::VideoCapture& cap, cv::Mat& frame)
@@ -105,30 +106,6 @@ get_stream_fps(cv::VideoCapture& cap)
 	}
 
 	return fps;
-}
-
-int
-get_width_mat(cv::Mat& m)
-{
-	if (m.empty())
-	{
-		fprintf(stderr, "%s(): Mat is empty \n", __func__);
-		return 0;
-	}
-
-	return m.cols;
-}
-
-int
-get_height_mat(cv::Mat& m)
-{
-	if (m.empty())
-	{
-		fprintf(stderr, "%s(): Mat is empty \n", __func__);
-		return 0;
-	}
-
-	return m.rows;
 }
 
 void
