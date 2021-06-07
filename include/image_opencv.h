@@ -6,9 +6,9 @@
 
 struct det_cv
 {
-    char name[64];
-    cv::Rect bbox_cv;
-    float pred_score;
+	char name[64];
+	cv::Rect bbox_cv;
+	float pred_score;
 };
 
 int
@@ -36,12 +36,12 @@ int
 get_height_mat(cv::Mat& m);
 
 void
-draw_bbox_cv(cv::Rect& bbox_cv, cv::Mat& m);
+draw_bbox_cv(const cv::Rect& bbox_cv, cv::Mat& m);
 
 void
-draw_detections(std::vector<cv::Rect>& det_cv, cv::Mat& frame);
+draw_detections(const std::vector<cv::Rect>& det_cv, cv::Mat& frame);
 
 void
-print_detection_cv(std::vector<cv::Rect>& det_cv);
+print_detection_cv(const std::vector<cv::Rect>& det_cv);
 
 #endif // IMAGE_OPENCV_H

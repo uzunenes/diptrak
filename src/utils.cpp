@@ -14,66 +14,76 @@ what_time_is_it_now(void)
 }
 
 cv::Point2f
-mat_to_point(cv::Mat& m)
+mat_to_point(const cv::Mat& m)
 {
-    cv::Point2f p;
+	cv::Point2f p;
 
-    p.x = 0;
-    p.y = 0;
+	p.x = 0;
+	p.y = 0;
 
-    if( m.empty() )
-    {
-        return p;
-    }
+	if (m.empty())
+	{
+		return p;
+	}
 
-    p.x = m.at<float>(0);
-    p.y = m.at<float>(1);
+	p.x = m.at<float>(0);
+	p.y = m.at<float>(1);
 
-    return p;
+	return p;
 }
 
 cv::Mat
-point_to_mat(cv::Point2f& p)
+point_to_mat(const cv::Point2f& p)
 {
-    cv::Mat m(2, 1, CV_32F);
+	cv::Mat m(2, 1, CV_32F);
 
-    m.at<float>(0) = p.x;
-    m.at<float>(1) = p.y;
+	m.at<float>(0) = p.x;
+	m.at<float>(1) = p.y;
 
-    return m;
+	return m;
 }
 
 cv::Point
-get_center_bbox_cv(cv::Rect& bbox_cv)
+get_center_bbox_cv(const cv::Rect& bbox_cv)
 {
-    cv::Point p;
+	cv::Point p;
 
-    p.x = bbox_cv.x + (bbox_cv.width / 2);
-    p.y = bbox_cv.y + (bbox_cv.height / 2);
+	p.x = bbox_cv.x + (bbox_cv.width / 2);
+	p.y = bbox_cv.y + (bbox_cv.height / 2);
 
-    return p;
+	return p;
 }
 
 int
 get_width_mat(cv::Mat& m)
 {
-    if (m.empty())
-    {
-        fprintf(stderr, "%s(): Mat is empty \n", __func__);
-        return 0;
-    }
+	if (m.empty())
+	{
+		fprintf(stderr, "%s(): Mat is empty \n", __func__);
+		return 0;
+	}
 
-    return m.cols;
+	return m.cols;
 }
 
 int
 get_height_mat(cv::Mat& m)
 {
-    if (m.empty())
-    {
-        fprintf(stderr, "%s(): Mat is empty \n", __func__);
-        return 0;
-    }
+	if (m.empty())
+	{
+		fprintf(stderr, "%s(): Mat is empty \n", __func__);
+		return 0;
+	}
 
-    return m.rows;
+	return m.rows;
+}
+
+double
+get_euclidean_distance_two_points(cv::Point2f p1, cv::Point2f p2)
+{
+	double distance;
+
+	distance = sqrt(pow(p1.y - p2.y, 2) + pow((p1.x - p2.x), 2));
+
+	return distance;
 }
