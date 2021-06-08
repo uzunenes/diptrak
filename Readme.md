@@ -14,4 +14,4 @@ $ make
 $ ./dvmot.out dvnmot.ini
 ```
 ## Note
-Please wailt drive weight files link
+Please wait google drive dnn weight files link
