@@ -2,6 +2,9 @@
 Deep Visual Multiple Object Tracking
 
 
+Example: [social distance detector covid-19](https://youtu.be/T5GswupN_v4)
+
+
 ## Prerequisites
 * [darknet](https://github.com/AlexeyAB/darknet)
 * [opencv3.4](https://github.com/opencv/opencv/tree/3.4)
@@ -13,6 +16,7 @@ Compile and run dvmot
 $ make
 $ ./dvmot.out dvnmot.ini
 ```
+
 ## Pre-trained models
 
 - Model: [yolov4](https://arxiv.org/abs/2004.10934), Dataset: MOT20
