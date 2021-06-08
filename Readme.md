@@ -13,6 +13,5 @@ Compile and run dvmot
 $ make
 $ ./dvmot.out dvnmot.ini
 ```
-
 ## Note
-Please wait not ready!
+Please wailt drive weight files link
