@@ -54,8 +54,8 @@ main(int argc, char** argv)
 	{
 		return -1;
 	}
-	// get first frame
-	if (!cap.read(frame))
+	
+	if (!cap.read(frame)) // get first frame
 	{
 		return -1;
 	}
@@ -70,7 +70,6 @@ main(int argc, char** argv)
 		return -1;
 	}
 
-	int test_cnt = 0;
 	while (1)
 	{
 		if (get_frame(cap, frame) != 0)
@@ -116,9 +115,6 @@ main(int argc, char** argv)
 		{
 			break;
 		}
-
-		if (++test_cnt > 300)
-			break;
 	}
 
 	release_video_writer(video_writer);
