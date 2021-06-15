@@ -2,9 +2,6 @@
 Deep Visual Multiple Object Tracking
 
 
-Example: [social distance detector covid-19](https://youtu.be/T5GswupN_v4)
-
-
 ## Prerequisites
 * [darknet](https://github.com/AlexeyAB/darknet)
 * [opencv3.4](https://github.com/opencv/opencv/tree/3.4)
@@ -28,3 +25,9 @@ $ ./dvmot.out dvnmot.ini
 	- [Weights file](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights)
 	- [Class names](https://github.com/AlexeyAB/darknet/blob/master/data/coco.names)
 	- [Config file](https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4.cfg)
+
+## Examples
+- [Multiple object tracking CCTV camera](https://youtu.be/T5GswupN_v4)
+
+- [Covid-19 social distance detector](https://youtu.be/T5GswupN_v4)
+	- Source code: [social_distance_detector branch](https://github.com/uzunenes/dvmot/tree/social_distance_detector) 
