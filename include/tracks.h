@@ -8,6 +8,7 @@ struct tracks
 {
 	int id;
 	cv::Rect bbox_cv;
+	std::string obj_name;
 	cv::KalmanFilter kalman_filter;
 	double last_tick_kf;
 	int age;                         // the number of frames since the track was first detected.
@@ -16,7 +17,7 @@ struct tracks
 };
 
 void
-update_tracks(std::vector<struct tracks>& tracks_objects, std::vector<cv::Rect>& det_cv, bool kalman_filter_is_enable, int distance_thresh_pixel, int invisible_for_too_long_thresh, int age_thresh, float visibility_thresh);
+update_tracks(std::vector<struct tracks>& tracks_objects, const std::vector<struct det_cv>& det_list, bool kalman_filter_is_enable, int distance_thresh_pixel, int invisible_for_too_long_thresh, int age_thresh, float visibility_thresh);
 
 void
 predict_new_locations_of_tracks(std::vector<struct tracks>& tracks_objects);

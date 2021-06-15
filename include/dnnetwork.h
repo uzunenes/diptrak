@@ -14,6 +14,7 @@ struct dnnetwork
 	int gpu_id;
 
 	network* net;
+	std::vector<std::string> obj_names;
 };
 
 int
@@ -22,7 +23,7 @@ load_dnnetwork(struct dnnetwork* dnnet);
 void
 close_network(struct dnnetwork* dnnet);
 
-std::vector<cv::Rect>
-detect_objects(const struct dnnetwork* dnnet, cv::Mat& m, int debug);
+std::vector<struct det_cv>
+detect_objects(const struct dnnetwork* dnnet, const cv::Mat& m, int debug);
 
 #endif // DNNETWORK_H

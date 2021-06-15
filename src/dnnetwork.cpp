@@ -2,8 +2,14 @@
 #include "../include/image_opencv.h"
 #include "../include/utils.h"
 
+struct filtered_detection_list_darknet
+{
+	int class_name_idx;
+	float probability;
+};
+
 static image
-mat_to_image(cv::Mat& mat)
+mat_to_image(const cv::Mat& mat)
 {
 	int w = mat.cols;
 	int h = mat.rows;
@@ -31,6 +37,8 @@ int
 load_dnnetwork(struct dnnetwork* dnnet)
 {
 	int clear;
+	std::ifstream obj_names_file;
+	std::string name;
 
 	cuda_set_device(dnnet->gpu_id);
 
@@ -44,6 +52,25 @@ load_dnnetwork(struct dnnetwork* dnnet)
 
 	fprintf(stdout, "%s(): Loaded net. w: [%d], h: [%d], inputs: [%d], outputs: [%d] \n", __func__, dnnet->net->w, dnnet->net->h, dnnet->net->inputs, dnnet->net->outputs);
 
+	// read obj names
+	obj_names_file.open(dnnet->obj_names_file);
+	if (!obj_names_file.is_open())
+	{
+		fprintf(stderr, "%s(): Failed to read obj names file: [%s] \n", __func__, dnnet->obj_names_file);
+		return -2;
+	}
+
+	while (1)
+	{
+		if (!getline(obj_names_file, name))
+		{
+			break;
+		}
+		dnnet->obj_names.push_back(name);
+	}
+
+	fprintf(stdout, "%s(): Readed total: [%d] obj names \n", __func__, (int)dnnet->obj_names.size());
+
 	return 0;
 }
 
@@ -53,22 +80,20 @@ close_network(struct dnnetwork* dnnet)
 	free_network_ptr(dnnet->net);
 }
 
-static std::vector<cv::Rect>
-detections_to_opencv_rect(const detection* det, int det_cnt, const int* det_filtered_flag, cv::Mat& m)
+static std::vector<struct det_cv>
+detections_to_det_cv(const struct dnnetwork* dnnet, const detection* det, int det_cnt, const struct filtered_detection_list_darknet* filtered_detection_list, const cv::Mat& m)
 {
 	int i;
-	detection* temp_det_ptr;
-	std::vector<cv::Rect> det_cv;
-	cv::Rect bbox_cv;
+	std::vector<struct det_cv> detection_list;
 
 	for (i = 0; i < det_cnt; ++i)
 	{
-		if (det_filtered_flag[i] == -1)
+		if (filtered_detection_list[i].class_name_idx < 0)
 		{
 			continue;
 		}
 
-		temp_det_ptr = (detection*)(det + i);
+		detection* temp_det_ptr = (detection*)(det + i);
 
 		int kw = m.cols * temp_det_ptr->bbox.w;
 		int kh = m.rows * temp_det_ptr->bbox.h;
@@ -98,35 +123,37 @@ detections_to_opencv_rect(const detection* det, int det_cnt, const int* det_filt
 		else if (kw > m.rows)
 			kw = m.rows;
 
+		struct det_cv temp_det_cv;
+		cv::Rect bbox_cv;
+
 		bbox_cv.x = left_x;
 		bbox_cv.y = top_y;
 		bbox_cv.width = kw;
 		bbox_cv.height = kh;
 
-		det_cv.push_back(bbox_cv);
+		temp_det_cv.name = dnnet->obj_names[filtered_detection_list[i].class_name_idx];
+		temp_det_cv.bbox_cv = bbox_cv;
+		temp_det_cv.pred_score = filtered_detection_list[i].probability;
+
+		detection_list.push_back(temp_det_cv);
 	}
 
-	return det_cv;
+	return detection_list;
 }
 
-std::vector<cv::Rect>
-detect_objects(const struct dnnetwork* dnnet, cv::Mat& m, int debug)
+std::vector<struct det_cv>
+detect_objects(const struct dnnetwork* dnnet, const cv::Mat& m, int debug)
 {
-	detection *det, *temp_det_ptr;
 	int det_cnt, i, j;
-	float max, thresh_normalized;
-	int* det_filtered_flag;
+	double thresh_normalized, start_time = 0;
+	detection* det;
 	image im;
-	std::vector<cv::Rect> det_cv;
-	double start_time;
+	std::vector<struct det_cv> detection_list;
+	struct filtered_detection_list_darknet* filtered_detection_list;
 
 	if (debug)
 	{
 		start_time = what_time_is_it_now();
-	}
-	else
-	{
-		start_time = 0;
 	}
 
 	im = mat_to_image(m);
@@ -137,46 +164,45 @@ detect_objects(const struct dnnetwork* dnnet, cv::Mat& m, int debug)
 
 	do_nms_sort(det, det_cnt, det->classes, thresh_normalized);
 
-	det_filtered_flag = (int*)malloc(det_cnt * sizeof(int));
-	if (det_filtered_flag == NULL)
+	filtered_detection_list = (struct filtered_detection_list_darknet*)malloc(det_cnt * sizeof(struct filtered_detection_list_darknet));
+	if (filtered_detection_list == NULL)
 	{
-		return det_cv;
+		return detection_list;
 	}
 
 	for (i = 0; i < det_cnt; ++i)
 	{
-		max = 0;
-		det_filtered_flag[i] = -1;
+		float max = 0;
+		filtered_detection_list[i].class_name_idx = -1;
 
-		for (j = 0; j < 1; ++j) // !! only person id
-								// for (j = 0; j < det->classes; ++j)
+		for (j = 0; j < det->classes; ++j)
 		{
-			temp_det_ptr = det + i;
+			detection* temp_det_ptr = det + i;
 
 			if (temp_det_ptr->prob[j] < thresh_normalized)
 			{
-				temp_det_ptr->prob[j] = 0;
 				continue;
 			}
 
 			if (max < temp_det_ptr->prob[j])
 			{
-				det_filtered_flag[i] = 1;
+				filtered_detection_list[i].class_name_idx = j;
+				filtered_detection_list[i].probability = temp_det_ptr->prob[j];
 				max = temp_det_ptr->prob[j];
 			}
 		}
 	}
 
-	det_cv = detections_to_opencv_rect(det, det_cnt, det_filtered_flag, m);
+	detection_list = detections_to_det_cv(dnnet, det, det_cnt, filtered_detection_list, m);
 
 	free_detections(det, det_cnt);
 	free_image(im);
-	free(det_filtered_flag);
+	free(filtered_detection_list);
 
 	if (debug)
 	{
-		fprintf(stdout, "%s(): Elapsed time: [%.1f] milisec, Detected object: [%d] \n", __func__, (what_time_is_it_now() - start_time) * 1000, (int)det_cv.size());
+		fprintf(stdout, "%s(): Elapsed time: [%.1f] milisec, Detected object: [%d] \n", __func__, (what_time_is_it_now() - start_time) * 1000, (int)detection_list.size());
 	}
 
-	return det_cv;
+	return detection_list;
 }

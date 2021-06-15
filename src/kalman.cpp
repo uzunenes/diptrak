@@ -12,7 +12,7 @@ predict(cv::KalmanFilter& kf)
 }
 
 void
-correct(cv::KalmanFilter& kf, cv::Point2f p)
+correct(cv::KalmanFilter& kf, const cv::Point2f& p)
 {
 	cv::Mat m = point_to_mat(p);
 
@@ -40,7 +40,7 @@ update_dT(cv::KalmanFilter& kf, double& last_tick)
 }
 
 cv::KalmanFilter
-init_kalman_filter(cv::Point2f initial_point, int state_size, int meas_size, int contr_size, int type)
+init_kalman_filter(const cv::Point2f& initial_point, int state_size, int meas_size, int contr_size, int type)
 {
 	const float process_noise_cov = 1e-2;
 	const float measurement_noise_cov = 1e-1;

@@ -56,7 +56,7 @@ create_video_writer(cv::VideoWriter& output_video_writer, const char* out_filena
 }
 
 int
-write_frame_in_video(cv::VideoWriter& output_video_writer, cv::Mat& mat)
+write_frame_in_video(cv::VideoWriter& output_video_writer, const cv::Mat& mat)
 {
 	try
 	{
@@ -90,7 +90,7 @@ release_video_writer(cv::VideoWriter& output_video_writer)
 }
 
 int
-get_stream_fps(cv::VideoCapture& cap)
+get_stream_fps(const cv::VideoCapture& cap)
 {
 	int fps;
 
@@ -115,23 +115,23 @@ draw_bbox_cv(const cv::Rect& bbox_cv, cv::Mat& m)
 }
 
 void
-draw_detections(const std::vector<cv::Rect>& det_cv, cv::Mat& m)
+draw_detections(const std::vector<struct det_cv>& detection_list, cv::Mat& m)
 {
 	int i;
 
-	for (i = 0; i < (int)det_cv.size(); ++i)
+	for (i = 0; i < (int)detection_list.size(); ++i)
 	{
-		draw_bbox_cv(det_cv[i], m);
+		draw_bbox_cv(detection_list[i].bbox_cv, m);
 	}
 }
 
 void
-print_detection_cv(const std::vector<cv::Rect>& det_cv)
+print_detection_cv(const std::vector<struct det_cv>& detection_list)
 {
 	int i;
 
-	for (i = 0; i < (int)det_cv.size(); ++i)
+	for (i = 0; i < (int)detection_list.size(); ++i)
 	{
-		printf("%s(): index: [%d], x: [%d] y: [%d] width: [%d] height: [%d] \n", __func__, i, det_cv[i].x, det_cv[i].y, det_cv[i].width, det_cv[i].height);
+		printf("%s(): index: [%d], x: [%d] y: [%d] width: [%d] height: [%d] , name: [%s], pred_score: [%.2f] \n", __func__, i, detection_list[i].bbox_cv.x, detection_list[i].bbox_cv.y, detection_list[i].bbox_cv.width, detection_list[i].bbox_cv.height, detection_list[i].name.c_str(), detection_list[i].pred_score);
 	}
 }
