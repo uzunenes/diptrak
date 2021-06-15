@@ -27,7 +27,7 @@ $ ./dvmot.out dvnmot.ini
 	- [Config file](https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4.cfg)
 
 ## Examples
-- [Multiple object tracking CCTV camera](https://youtu.be/T5GswupN_v4)
+- [Multiple object tracking CCTV camera](https://youtu.be/wHSz6CsvsOg)
 
-- [Covid-19 social distance detector](https://youtu.be/T5GswupN_v4)
-	- Source code: [social_distance_detector branch](https://github.com/uzunenes/dvmot/tree/social_distance_detector) 
+- [Covid-19 social distance detector](https://youtu.be/ZMgORyEv9K8)
+	- Source: [social_distance_detector branch](https://github.com/uzunenes/dvmot/tree/social_distance_detector) 
