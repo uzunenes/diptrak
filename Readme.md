@@ -11,7 +11,7 @@ Deep Visual Multiple Object Tracking
 Compile and run dvmot
 ```
 $ make
-$ ./dvmot.out dvnmot.ini
+$ ./dvmot.out dvmot.ini
 ```
 
 ## Pre-trained models
