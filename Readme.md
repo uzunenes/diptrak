@@ -4,7 +4,9 @@ Deep Visual Multiple Object Tracking
 
 ## Prerequisites
 * [darknet](https://github.com/AlexeyAB/darknet)
+	- [How to use darknet library ?](https://github.com/uzunenes/nots/blob/master/libdarknet.md)
 * [opencv3.4](https://github.com/opencv/opencv/tree/3.4)
+	- [Opencv installiation guide](https://github.com/uzunenes/nots/blob/master/opencv_install.md)
 
 
 ## Usage
