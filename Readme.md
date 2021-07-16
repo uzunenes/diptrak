@@ -28,7 +28,7 @@ $ ./dvmot.out dvmot.ini
 	- [Class names](https://github.com/AlexeyAB/darknet/blob/master/data/coco.names)
 	- [Config file](https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4.cfg)
 
-## Examples
+## Examples videos
 - [Multiple object tracking CCTV camera](https://youtu.be/wHSz6CsvsOg)
 
 - [Covid-19 social distance detector](https://youtu.be/ZMgORyEv9K8)
