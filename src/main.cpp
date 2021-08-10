@@ -3,13 +3,13 @@
 #include "../include/dnnetwork.h"
 #include "../include/image_opencv.h"
 #include "../include/ini.h"
-#include "../include/tracks.h"
 #include "../include/social_distance.h"
+#include "../include/tracks.h"
 #include "../include/utils.h"
+#include <csignal>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <signal.h>
-#include <string.h>
 
 // -- global variables ---
 static volatile int g_exit_signal = 0;
@@ -36,10 +36,10 @@ main(int argc, char** argv)
 	bool social_distance_is_enable = 0;
 	int social_distance_thres_pixel, social_distance_lost_time_thres_sec, social_distance_error_thres_sec;
 
-	fprintf(stdout, "%s(): dvmot started, version: [%s] .\n", __func__, Version);
+	fprintf(stdout, "%s(): diptrak started, version: [%s] .\n", __func__, Version);
 	if (argc != 2)
 	{
-		fprintf(stderr, "%s(): Usage [./dvmot dvmot.ini] .\n", __func__);
+		fprintf(stderr, "%s(): Usage [./diptrak diptrak.ini] .\n", __func__);
 		return -1;
 	}
 
@@ -54,7 +54,7 @@ main(int argc, char** argv)
 	{
 		return -1;
 	}
-	
+
 	if (!cap.read(frame)) // get first frame
 	{
 		return -1;
@@ -104,7 +104,7 @@ main(int argc, char** argv)
 
 		if (app_show_frame)
 		{
-			cv::imshow("dvmot", frame);
+			cv::imshow("diptrak", frame);
 		}
 
 		write_frame_in_video(video_writer, frame);
