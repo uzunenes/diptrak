@@ -34,4 +34,4 @@ $ ./diptrak.out diptrak.ini
 - [Multiple object visual tracking CCTV camera](https://youtu.be/wHSz6CsvsOg)
 
 - [Covid-19 social distance detector](https://youtu.be/ZMgORyEv9K8)
-	- Source: [social_distance_detector branch](https://github.com/uzunenes/dvmot/tree/social_distance_detector) 
+	- Source: [social_distance_detector branch](https://github.com/uzunenes/diptrak/tree/social_distance_detector) 
