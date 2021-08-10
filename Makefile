@@ -1,3 +1,4 @@
+PROJECT_NAME = diptrak
 CC = gcc
 CPP = g++
 CFLAGS = -Wall -Wextra -O3
@@ -9,11 +10,11 @@ LDFLAGS = -ldarknet `pkg-config --libs opencv`
 CFLAGS += `pkg-config --cflags opencv`
 
 
-all: obj dvmot
+all: obj $(PROJECT_NAME)
 
 
-dvmot: $(OBJCC) $(OBJCPP)
-	$(CPP) $(OBJCC) $(OBJCPP) $(LDFLAGS) -o dvmot.out
+$(PROJECT_NAME): $(OBJCC) $(OBJCPP)
+	$(CPP) $(OBJCC) $(OBJCPP) $(LDFLAGS) -o $(PROJECT_NAME).out
 
 
 obj/%.o: src/%.c

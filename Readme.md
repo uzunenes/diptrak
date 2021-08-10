@@ -1,5 +1,5 @@
-# dvmot
-Deep Visual Multiple Object Tracking
+# diptrak
+Deep learning-based multiple object visual tracking examples
 
 
 ## Prerequisites
@@ -10,11 +10,12 @@ Deep Visual Multiple Object Tracking
 
 
 ## Usage
-Compile and run dvmot
+Compile and run diptrak
 ```
 $ make
-$ ./dvmot.out dvmot.ini
+$ ./diptrak.out diptrak.ini
 ```
+
 
 ## Pre-trained models
 
@@ -28,8 +29,9 @@ $ ./dvmot.out dvmot.ini
 	- [Class names](https://github.com/AlexeyAB/darknet/blob/master/data/coco.names)
 	- [Config file](https://raw.githubusercontent.com/AlexeyAB/darknet/master/cfg/yolov4.cfg)
 
+
 ## Examples videos
-- [Multiple object tracking CCTV camera](https://youtu.be/wHSz6CsvsOg)
+- [Multiple object visual tracking CCTV camera](https://youtu.be/wHSz6CsvsOg)
 
 - [Covid-19 social distance detector](https://youtu.be/ZMgORyEv9K8)
 	- Source: [social_distance_detector branch](https://github.com/uzunenes/dvmot/tree/social_distance_detector) 
