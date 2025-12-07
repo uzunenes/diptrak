@@ -1,6 +1,7 @@
 # diptrak
-Deep learning-based multiple object visual tracking examples
+> Deep learning-based multiple object tracking with YOLOv4, Kalman Filter & Hungarian Algorithm
 
+Real-time visual object tracking using darknet and OpenCV. Includes pre-trained models and example videos.
 
 ## Prerequisites
 * [darknet](https://github.com/AlexeyAB/darknet)
