@@ -118,12 +118,10 @@ detections_to_det_cv(const struct dnnetwork* dnnet, const detection* det, int de
 		else if (kw > m.cols)
 			kw = m.cols;
 
-		if (kh < 0)
-			kh = 0;
-		else if (kw > m.rows)
-			kw = m.rows;
-
-		struct det_cv temp_det_cv;
+				if (kh < 0)
+					kh = 0;
+				else if (kh > m.rows)
+					kh = m.rows;		struct det_cv temp_det_cv;
 		cv::Rect bbox_cv;
 
 		bbox_cv.x = left_x;

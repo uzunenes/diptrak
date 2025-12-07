@@ -50,7 +50,7 @@ delete_lost_tracks(std::vector<struct tracks>& tracks, int invisible_for_too_lon
 {
 	int i;
 
-	for (i = 0; i < (int)tracks.size(); ++i)
+	for (i = (int)tracks.size() - 1; i >= 0; --i)
 	{
 		float visibility = (float)tracks[i].total_visible_count / (float)tracks[i].age;
 
